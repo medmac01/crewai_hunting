@@ -2,7 +2,7 @@ import os
 from crewai import Agent, Task, Crew, Process
 from textwrap import dedent
 from tools.elastic_tool import EventSearchTool
-from tools.cve_search_tool import CVESearchTool
+from tools.cve_avd_tool import CVESearchTool
 from langchain_community.llms import HuggingFaceHub, Ollama
 from dotenv import load_dotenv
 
@@ -51,7 +51,8 @@ class HunterCrew:
     cve_searcher = Agent(
       role='CVE Searcher',
       goal='Prompt the user for a CVE ID/keyword, then utilize the CVE Search Tool to search for information related to that CVE ID/keyword, and provide the search results to the explainer agent for further explanation.',
-      backstory="""You are an expert in CVE (Common Vulnerabilities and Exposures) research and analysis. Your role involves retrieving detailed information about CVEs based on user queries.""",
+      backstory="""You are an expert in CVE (Common Vulnerabilities and Exposures) research and analysis. Your role involves retrieving detailed information about CVEs based on user queries.
+      DON'T summarize the information, pass it as it is to the explainer agent.""",
       verbose=True,
       allow_delegation=True,
       tools=[cve_search_tool],
@@ -62,7 +63,7 @@ class HunterCrew:
       goal=f'Provide detailed and technical explainations to user question based on search results. Here is the query from the user that you need to explain: {self.query}',
       backstory="""You are a renowned Cybersecurity analytics expert, known for your insightful explainations.
       You transform complex data into compelling reports. Don't tell any disclaimers, just provide the information.
-      Don't look for supplementary information, just use the information provided to you.""",
+      Don't look for supplementary information and don't use any tools nor create them, just use the information provided to you.""",
       verbose=True,
       allow_delegation=False,
       llm=wrn
@@ -88,6 +89,7 @@ class HunterCrew:
     # Create tasks for your agents
     task3 = Task(
         description=f"""Take a user query that contains a CVE ID, search for information related to that CVE ID, and then pass the search results to the explainer agent.
+        Don't summarize the information nor modify it, pass it as it is to the explainer agent.
         If the user query doesn't contain a CVE ID, delegate it to the general agent.
 
         Here is the query from the user that you need to search for: {self.query}""",
@@ -104,7 +106,7 @@ class HunterCrew:
 
 
     task2 = Task(
-      description=f"""Using the search results provided by the searcher agent, develop a short and compelling/interesting short-form explanation of the 
+      description=f"""Using the search results provided by the searcher agent, develop a bit detailed and compelling/interesting technical explanation of the 
       text provided to you about Cybersecurity answering to the following query {self.query}""",
       agent=explainer
     )
