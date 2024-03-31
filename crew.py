@@ -13,8 +13,8 @@ And most importantly, you should not provide any disclaimers or additional infor
 AGAIN DON'T USE TOOLS NO MATTER WHAT, JUST USE THE INFORMATION PROVIDED TO YOU.
 '''
 
-llm = Ollama(model="openhermes", base_url="https://3fb8-41-87-148-33.ngrok-free.app", temperature=0.1, num_predict=-1)
-wrn = Ollama(model="wrn", base_url="https://3fb8-41-87-148-33.ngrok-free.app", temperature=0.1, system=sys_prompt_wrn)
+llm = Ollama(model="openhermes", base_url="https://7625-41-87-148-33.ngrok-free.app", temperature=0.1, num_predict=-1)
+wrn = Ollama(model="wrn", base_url="https://7625-41-87-148-33.ngrok-free.app", temperature=0.1, system=sys_prompt_wrn)
 
 # print("## Test llm : ")
 # print(llm.invoke("Hello, /how are you?"))
@@ -62,21 +62,8 @@ class HunterCrew:
       Don't look for supplementary information and don't use any tools nor create them, just use the information provided to you.
       Answer: """,
       verbose=True,
-      function_calling_llm=None,
       allow_delegation=False,
       llm=wrn,
-      expected_output=dedent("""
-      Explain CVE-XXXX-XXXXX in simple terms:
-
-      - CVE ID: CVE-XXXX-XXXXX
-      - Status: Modified
-      - Description: The issue was addressed with improved checks. This issue is fixed in macOS Sonoma 14. Processing web content may lead to arbitrary code execution. Apple is aware of a report that this issue may have been actively exploited against versions of iOS before iOS 16.7.
-      - CVSS Score: Not available
-      - Affected Configurations: cpe:2.3:a:apple:safari:*:*:*:*:*:*:*:*, cpe:2.3:o:apple:ipados:*:*:*:*:*:*:*:*, cpe:2.3:o:apple:ipados:17.0:*:*:*:*:*:*:*, cpe:2.3:o:apple:iphone_os:*:*:*:*:*:*:*:*, cpe:2.3:o:apple:iphone_os:17.0:*:*:*:*:*:*:*, cpe:2.3:o:apple:macos:*:*:*:*:*:*:*:*
-      - Affected Configurations: cpe:2.3:o:fedoraproject:fedora:37:*:*:*:*:*:*:*, cpe:2.3:o:fedoraproject:fedora:38:*:*:*:*:*:*:*, cpe:2.3:o:fedoraproject:fedora:39:*:*:*:*:*:*:*
-      - Affected Configurations: cpe:2.3:o:debian:debian_linux:11.0:*:*:*:*:*:*:*, cpe:2.3:o:debian:debian_linux:12.0:*:*:*:*:*:*:*
-      - References: https://security.gentoo.org/glsa/202401-33, https://support.apple.com/en-us/HT213940)
-    """)
     )
 
     general_agent = Agent(
@@ -103,9 +90,27 @@ class HunterCrew:
         Don't summarize the information nor modify it, pass it as it is to the explainer agent.
         If the user query doesn't contain a CVE ID, delegate it to the general agent.
         AGAIN DON'T summarize the information, pass it as it is to the explainer agent
+        Also, pass ALL the information to the explainer agent, don't skip anything.
 
         Here is the query from the user that you need to search for: {self.query}""",
-        agent=cve_searcher
+        agent=cve_searcher,
+        expected_output=dedent("""
+      Explain the following CVE-XXXX-XXXXX in simple terms:
+
+      - CVE ID: CVE-XXXX-XXXXX
+      - Status: 
+      - Description: 
+      - CVSS Score: 
+      - Affected Configurations: 
+      - References: [put links here (github, reports, virus total, etc)]
+                               
+      - CVE ID: CVE-XXXX-XXXXX
+      - Status: 
+      - Description: 
+      - CVSS Score: 
+      - Affected Configurations: 
+      - References: [put links here (github, reports, virus total, etc)]                               
+    """)
     )
 
     task1 = Task(
