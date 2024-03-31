@@ -35,12 +35,17 @@ class HunterCrew:
   def run(self):
     searcher = Agent(
       role='Searcher of events',
-      goal='Ask the user for a query, then use the EventSearchTool to then search the keyword (can be an IP address/ hash/ registry key/ domain...), and provide the search results to the explainer agent so it can then be explained',
+      goal='Ask the user for a query, then use the EventSearchTool to then search the keyword (can be an IP address/ hash/ registry key/ domain...), then use the search results to answer the user query in a technical way. while providing any necessary background information to help the audience understand the context of the concept. ',
       backstory="""You work at a big events archive.
-      Your expertise is taking user's question and getting the search results""",
+      Your expertise is taking user's question and getting the search results from the search tool.
+      You should then use search results to provide and thourough explanation to user.
+      Don't provide any disclaimers nor additional information, just provide the information.
+      If the search results is empty or not found, just tell it to the user.
+      Also, while answering the question, provide event_id and any links of external analysis if available.
+      """,
       verbose=True,
       allow_delegation=True,
-      tools=[ioc_search_tool],
+      tools=[ioc_search_tool],  
       llm=llm
     )
     cve_searcher = Agent(
@@ -114,8 +119,10 @@ class HunterCrew:
     )
 
     task1 = Task(
-      description=f"""Take a user query that contain and indicator of compromise, search for the keyword and then pass the search results to the explainer agent
-      If the user query doesn't contain any indicator just delegate it to the general agent
+      description=f"""Take a user query that contain and indicator of compromise, 
+      search for the keyword using ioc_search_tool and then explain the search results in a technical way to the user while answering the following query {self.query}
+      You MUST use the tool provided to you to search for the keyword.
+      This is how to use the tool: `Use Tool: Event search Tool(keyword: str)`.
       
       here is the query from the user that you need to search for: {self.query}""",
       agent=searcher
@@ -135,8 +142,8 @@ class HunterCrew:
 
     # Instantiate your crew with a sequential process
     HunterCrew = Crew(
-      agents=[explainer, cve_searcher],
-      tasks=[task3, task2],
+      agents=[explainer, searcher],
+      tasks=[task1],
       verbose=2, # You can set it to 1 or 2 to different logging levels
       manager_llm=llm
     )
