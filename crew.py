@@ -25,6 +25,7 @@ wrn = Ollama(model="wrn", base_url="https://7625-41-87-148-33.ngrok-free.app", t
 
 
 ioc_search_tool = EventSearchTool().search
+event_id_search_tool = EventSearchTool().get_event_by_id
 cve_search_tool = CVESearchTool().cvesearch
 
 # Define your agents with roles and goals
@@ -35,7 +36,7 @@ class HunterCrew:
   def run(self):
     searcher = Agent(
       role='Searcher of events',
-      goal='Ask the user for a query, then use the EventSearchTool to then search the keyword (can be an IP address/ hash/ registry key/ domain...), then use the search results to answer the user query in a technical way. while providing any necessary background information to help the audience understand the context of the concept. ',
+      goal='Ask the user for a query, then use the EventSearchTool to then search the keyword (can be an IP address/ hash/ registry key/ domain...) or an event ID, then use the search results to answer the user query in a technical way. while providing any necessary background information to help the audience understand the context of the concept. ',
       backstory="""You work at a big events archive.
       Your expertise is taking user's question and getting the search results from the search tool.
       You should then use search results to provide and thourough explanation to user.
@@ -45,7 +46,7 @@ class HunterCrew:
       """,
       verbose=True,
       allow_delegation=True,
-      tools=[ioc_search_tool],  
+      tools=[ioc_search_tool, event_id_search_tool],  
       llm=llm
     )
     cve_searcher = Agent(
