@@ -31,6 +31,7 @@ class CVESearchTool():
 
         # Convert dictionary to JSON string
         json_string = json.dumps(cve_dict, indent=4)
+        # return json_string
         return json_string
     else:
         print("Failed to fetch the page:", response.status_code)
