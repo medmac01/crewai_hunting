@@ -156,7 +156,7 @@ class HunterCrew:
     combined_search_task = Task(
     description=f"""Take a user query that contains an indicator of compromise (can be ip address, filename, hostname, regkey, email address, domain, hash, link) or an event ID/CVE ID, 
     then search for it using either "CVE Search Tool" or "IOC Search Tool" or "Event search by event_id Tool" (MUST CHOOSE ONLY ONE TOOL ACCORDING TO USER INPUT: {self.query}).
-    Use "CVE Search Tool" for CVE(Common Vulnerability and Exposure) search and "IOC Search Tool"s for security event search.
+    Use "CVE Search Tool" for CVE(Common Vulnerability and Exposure) search and "IOC Search Tool"s for security indicator of compromise (IOC) search.
     Use "Event search by event_id" Tool to search for an event by its id.
     You MUST ONLY use the tools provided to you.
 
@@ -227,6 +227,7 @@ Final Answer:
       tasks=[combined_search_task, explain_task],
       verbose=2, # You can set it to 1 or 2 to different logging levels
       manager_llm=llm,
+      process=Process.hierarchical
     )
 
     # print(llm._default_params)

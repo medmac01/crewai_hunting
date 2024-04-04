@@ -1,3 +1,4 @@
 .env
 .embedchain
 scratch_scripts
+__pycache__
